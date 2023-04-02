@@ -71,8 +71,13 @@ CREATE TABLE IF NOT EXISTS colaboradores(
 
 CREATE TABLE IF NOT EXISTS sucursales(
     id_sucursal INT PRIMARY KEY,
-    nombre VARCHAR(50) UNIQUE,
+    nombre VARCHAR(50),
+    id_sector INT,
     id_gerente INT,
+
+    CONSTRAINT fk_sucursal_sector
+        FOREIGN KEY (id_sector)
+            REFERENCES sectores(id_sector),
 
     CONSTRAINT fk_sucursal_colaborador
         FOREIGN KEY (id_gerente)
@@ -81,28 +86,7 @@ CREATE TABLE IF NOT EXISTS sucursales(
 
 CREATE TABLE IF NOT EXISTS tipos_cuentas(
     id_tipo_cuenta INT PRIMARY KEY,
-    tipo_cuenta VARCHAR(15) UNIQUE
-);
-
-CREATE TABLE IF NOT EXISTS tarjetas(
-    id_tarjeta INT PRIMARY KEY,
-    nombre VARCHAR(50),
-    vencimiento TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS cuentas(
-    id_cuenta INT PRIMARY KEY,
-    nombre_cuenta VARCHAR(75),
-    id_tipo_cuenta INT,
-    no_tarjeta INT,
-
-    CONSTRAINT fk_cuentas_tipo_cuentas
-        FOREIGN KEY (id_tipo_cuenta)
-            REFERENCES tipos_cuentas(id_tipo_cuenta),
-
-    CONSTRAINT fk_cuentas_tarjeta
-        FOREIGN KEY (no_tarjeta)
-            REFERENCES tarjetas(id_tarjeta)
+    tipo_cuenta VARCHAR(50) UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS clientes(
@@ -124,45 +108,26 @@ CREATE TABLE IF NOT EXISTS clientes(
             REFERENCES direcciones(id_direccion)
 );
 
-CREATE TABLE IF NOT EXISTS cuentas_clientes(
-    id_cuenta INT,
-    id_cliente INT,
-    fecha_creacion TIMESTAMP,
+CREATE TABLE IF NOT EXISTS cuentas(
+    id_cuenta INT PRIMARY KEY,
+    nombre_cuenta VARCHAR(100),
     balance DOUBLE PRECISION,
+    id_tipo_cuenta INT,
+    id_cliente INT,
 
-    CONSTRAINT pk_cuentas_clientes
-        PRIMARY KEY (id_cuenta, id_cliente),
-
+    CONSTRAINT fk_cuentas_tipo_cuentas
+        FOREIGN KEY (id_tipo_cuenta)
+            REFERENCES tipos_cuentas(id_tipo_cuenta),
+    
     CONSTRAINT fk_cuentas_clientes
-        FOREIGN KEY (id_cuenta)
-            REFERENCES cuentas(id_cuenta),
-
-    CONSTRAINT fk_clientes_cuetnas
         FOREIGN KEY (id_cliente)
             REFERENCES clientes(id_cliente)
 );
 
-CREATE TABLE IF NOT EXISTS cuentas(
-    id_cuentas INT PRIMARY KEY,
-    nombre_cuenta VARCHAR(50),
-    id_tipo_cuenta INT,
-    id_no_tarjeta INT,
-
-    CONSTRAINT fk_cuentas_tipoCuentas
-        FOREIGN KEY (id_tipo_cuenta)
-            REFERENCES tipos_cuentas(id_tipo_cuenta),
-
-    CONSTRAINT fk_cuentas_noTarjeta
-        FOREIGN KEY (id_no_tarjeta)
-            REFERENCES tarjetas(id_tarjeta)
-);
-
-
 CREATE TABLE IF NOT EXISTS transacciones(
-    id_transaccion INT PRIMARY KEY,
+    id_transaccion BIGINT PRIMARY KEY,
     fecha_hora TIMESTAMP,
     monto DOUBLE PRECISION,
-    no_confirmacion INT UNIQUE,
 
     id_tipo_transaccion INT,
     id_divisa INT,
@@ -187,7 +152,7 @@ CREATE TABLE IF NOT EXISTS transacciones(
 
     CONSTRAINT fk_documento_transaccion
         FOREIGN KEY (id_documento_respaldo)
-            REFERENCES documentos(id_documento),
+            REFERENCES tipo_documentos(id_tipo_documento),
 
     CONSTRAINT fk_sucursal_transaccion
         FOREIGN KEY (id_sucursal)
